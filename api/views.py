@@ -11,7 +11,12 @@ from django.http import Http404
 
 from blogs.models import Blog, Comment
 from blogs.serializers import BlogSerializer, CommentSerializer
-from rest_framework import generics
+from rest_framework import generics, viewsets
+from .paginations import CustomPagination
+
+from blogs.filters import BlogFilter
+
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 # Create your views here.
 
@@ -95,11 +100,16 @@ class UserDetail(APIView):
         user = self.get_object(pk)
         user.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
-    
+
 
 class BlogsView(generics.ListCreateAPIView):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    pagination_class = CustomPagination
+    filterset_class = BlogFilter
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description']
+    ordering_fields = ['id', 'title', 'description']
 
 class CommentsView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
